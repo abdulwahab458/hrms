@@ -2,6 +2,15 @@ import DataJabatan from "../models/DataJabatanModel.js";
 import DataPegawai from "../models/DataPegawaiModel.js";
 import {Op} from "sequelize";
 
+const validatePositiveAmount = (value, label) => {
+    const numericValue = Number.parseInt(value, 10);
+    if (Number.isNaN(numericValue) || numericValue <= 0) {
+        return `${label} harus lebih dari 0`;
+    }
+
+    return null;
+};
+
 // menampilkan semua data jabatan
 export const getDataJabatan = async (req, res) => {
     try {
@@ -36,6 +45,16 @@ export const createDataJabatan = async (req, res) => {
             id_jabatan, nama_jabatan, gaji_pokok, tj_transport, uang_makan
         } = req.body;
     try {
+        const salaryErrors = [
+            validatePositiveAmount(gaji_pokok, "Gaji pokok"),
+            validatePositiveAmount(tj_transport, "Tunjangan transport"),
+            validatePositiveAmount(uang_makan, "Uang makan"),
+        ].filter(Boolean);
+
+        if (salaryErrors.length > 0) {
+            return res.status(400).json({msg: salaryErrors[0]});
+        }
+
         if(req.hak_akses === "admin"){
             await DataJabatan.create({
                 id_jabatan: id_jabatan,
@@ -72,6 +91,17 @@ export const updateDataJabatan = async (req, res) => {
         });
         if(!jabatan) return res.status(404).json({msg: "Data tidak ditemukan"});
         const {nama_jabatan, gaji_pokok, tj_transport, uang_makan} = req.body;
+
+        const salaryErrors = [
+            validatePositiveAmount(gaji_pokok, "Gaji pokok"),
+            validatePositiveAmount(tj_transport, "Tunjangan transport"),
+            validatePositiveAmount(uang_makan, "Uang makan"),
+        ].filter(Boolean);
+
+        if (salaryErrors.length > 0) {
+            return res.status(400).json({msg: salaryErrors[0]});
+        }
+
         if(req.hak_akses === "admin"){
             await DataJabatan.update({
                 nama_jabatan, gaji_pokok, tj_transport, uang_makan
