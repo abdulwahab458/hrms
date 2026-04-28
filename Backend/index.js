@@ -16,14 +16,12 @@ import OvertimeRoute from './routes/OvertimeRoute.js';
 
 const app = express();
 
+app.use(express.static("public"));
+
 const sessionStore = SequelizeStore(session.Store);
 const store = new sessionStore({
     db: db
 });
-
-/* (async() => {
-    await db.sync();
-})(); */
 
 dotenv.config();
 
@@ -46,15 +44,12 @@ app.use(cors ({
 app.use(express.json());
 
 app.use(FileUpload());
-app.use(express.static("public"));
 
 app.use(UserRoute);
 app.use(DataJabatanRoute);
 app.use(AuthRoute);
 app.use(DataKehadiranRoute);
 app.use(OvertimeRoute);
-
-// store.sync();
 
 app.listen(process.env.APP_PORT, () => {
     console.log('Server up and running...');

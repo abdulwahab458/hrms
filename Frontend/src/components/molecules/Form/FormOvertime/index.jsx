@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import DefaultLayoutAdmin from '../../../../../layout/DefaultLayoutAdmin';
-import { BreadcrumbAdmin, ButtonOne, ButtonTwo } from '../../../../..';
+import DefaultLayoutAdmin from '../../../../layout/DefaultLayoutAdmin';
+import { BreadcrumbAdmin, ButtonOne, ButtonTwo } from '../../..';
 
 const OvertimeForm = () => {
   const [employees, setEmployees] = useState([]);

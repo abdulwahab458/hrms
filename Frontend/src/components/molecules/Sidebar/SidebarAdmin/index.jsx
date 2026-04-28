@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import PropTypes from 'prop-types'
 import { NavLink, useLocation } from 'react-router-dom'
 import SidebarLinkGroup from '../SidebarLinkGroup'
 import Logo from '../../../../assets/images/logo/logo.svg'
@@ -395,3 +396,8 @@ const SidebarAdmin = ({ sidebarOpen, setSidebarOpen }) => {
 }
 
 export default SidebarAdmin;
+
+SidebarAdmin.propTypes = {
+  sidebarOpen: PropTypes.bool.isRequired,
+  setSidebarOpen: PropTypes.func.isRequired,
+}
