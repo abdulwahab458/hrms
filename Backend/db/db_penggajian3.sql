@@ -192,6 +192,31 @@ ALTER TABLE `data_pegawai`
 ALTER TABLE `data_jabatan`
   ADD CONSTRAINT `data_jabatan_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `data_pegawai` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
   ADD CONSTRAINT `data_jabatan_ibfk_2` FOREIGN KEY (`dataPegawaiId`) REFERENCES `data_pegawai` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `overtime`
+--
+
+CREATE TABLE `overtime` (
+  `id` int(11) NOT NULL,
+  `employee_id` varchar(255) NOT NULL,
+  `date` date NOT NULL,
+  `hours` int(3) NOT NULL,
+  `reason` text NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Indexes for table `overtime`
+ALTER TABLE `overtime`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `employee_date_unique` (`employee_id`,`date`);
+
+-- AUTO_INCREMENT for table `overtime`
+ALTER TABLE `overtime`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
