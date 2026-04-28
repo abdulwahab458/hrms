@@ -23,6 +23,7 @@ const AppRoutes = () => {
       {/* Master Data Admin */}
       <Route path='/admin/master-data/data-pegawai' element={<DataPegawai />} />
       <Route path='/admin/master-data/data-pegawai/form-data-pegawai' element={<FormDataPegawai />} />
+      <Route path='/admin/master-data/data-pegawai/form-data-pegawai/:id' element={<FormDataPegawai />} />
       <Route path='/admin/master-data/data-jabatan' element={<DataJabatan />} />
       <Route path='/admin/master-data/data-jabatan/form-data-jabatan' element={<FormDataJabatan />} />
       {/* Transaksi Admin */}

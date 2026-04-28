@@ -1,17 +1,35 @@
-import React from 'react';
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import DefaultLayoutAdmin from '../../../../layout/DefaultLayoutAdmin';
 import { BreadcrumbAdmin, ButtonOne, ButtonTwo, ButtonThree } from '../../..';
-import { MdOutlineKeyboardArrowDown } from 'react-icons/md'
+import { MdOutlineKeyboardArrowDown } from 'react-icons/md';
+
+const designationOptions = ['Mason', 'Electrician', 'Plumber', 'Supervisor', 'Helper'];
 
 const FormDataPegawai = () => {
+  const [designation, setDesignation] = useState('');
+  const [errors, setErrors] = useState({});
+
+  const validateDesignation = (value) => {
+    if (!value) {
+      setErrors((currentErrors) => ({ ...currentErrors, designation: 'Designation wajib dipilih' }));
+      return false;
+    }
+
+    setErrors((currentErrors) => {
+      const nextErrors = { ...currentErrors };
+      delete nextErrors.designation;
+      return nextErrors;
+    });
+    return true;
+  };
+
   return (
     <DefaultLayoutAdmin>
       <BreadcrumbAdmin pageName='Form Pegawai' />
 
       <div className='sm:grid-cols-2'>
         <div className='flex flex-col gap-9'>
-          {/* <!-- Form Data Pegawai --> */}
           <div className='rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
             <div className='border-b border-stroke py-4 px-6.5 dark:border-strokedark'>
               <h3 className='font-medium text-black dark:text-white'>
@@ -44,7 +62,7 @@ const FormDataPegawai = () => {
                   </div>
                 </div>
 
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className='mb-4.5 flex flex-col gap-6 xl:flex-row'>
                   <div className='w-full xl:w-1/2'>
                     <label className='mb-2.5 block text-black dark:text-white'>
                       Username <span className='text-meta-1'>*</span>
@@ -68,7 +86,7 @@ const FormDataPegawai = () => {
                   </div>
                 </div>
 
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className='mb-4.5 flex flex-col gap-6 xl:flex-row'>
                   <div className='w-full xl:w-1/2'>
                     <label className='mb-2.5 block text-black dark:text-white'>
                       Jenis Kelamin <span className='text-meta-1'>*</span>
@@ -103,7 +121,33 @@ const FormDataPegawai = () => {
                   </div>
                 </div>
 
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
+                <div className='mb-4.5 flex flex-col gap-6 xl:flex-row'>
+                  <div className='w-full xl:w-1/2'>
+                    <label htmlFor='designation' className='mb-2.5 block text-black dark:text-white'>
+                      Designation <span className='text-meta-1'>*</span>
+                    </label>
+                    <div className='relative z-20 bg-transparent dark:bg-form-input'>
+                      <select
+                        id='designation'
+                        value={designation}
+                        onChange={(event) => {
+                          setDesignation(event.target.value);
+                          validateDesignation(event.target.value);
+                        }}
+                        onBlur={(event) => validateDesignation(event.target.value)}
+                        className='relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
+                      >
+                        <option value=''>Silahkan pilih</option>
+                        {designationOptions.map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                      <span className='absolute top-1/2 right-4 z-30 -translate-y-1/2 text-2xl'>
+                        <MdOutlineKeyboardArrowDown />
+                      </span>
+                    </div>
+                    {errors.designation && <p className='mt-2 text-sm text-danger'>{errors.designation}</p>}
+                  </div>
                   <div className='w-full xl:w-1/2'>
                     <label className='mb-2.5 block text-black dark:text-white'>
                       Tanggal Masuk <span className='text-meta-1'>*</span>
@@ -113,6 +157,9 @@ const FormDataPegawai = () => {
                       className='w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary'
                     />
                   </div>
+                </div>
+
+                <div className='mb-4.5 flex flex-col gap-6 xl:flex-row'>
                   <div className='w-full xl:w-1/2'>
                     <label className='mb-2.5 block text-black dark:text-white'>
                       Status <span className='text-meta-1'>*</span>
@@ -128,9 +175,7 @@ const FormDataPegawai = () => {
                       </span>
                     </div>
                   </div>
-                </div>
 
-                <div className="mb-4.5 flex flex-col gap-6 xl:flex-row">
                   <div className='w-full xl:w-1/2'>
                     <label className='mb-2.5 block text-black dark:text-white'>
                       Hak Akses <span className='text-meta-1'>*</span>
@@ -146,7 +191,9 @@ const FormDataPegawai = () => {
                       </span>
                     </div>
                   </div>
+                </div>
 
+                <div className='mb-4.5 flex flex-col gap-6 xl:flex-row'>
                   <div className='w-full xl:w-1/2'>
                     <label className='mb-2.5 block text-black dark:text-white'>
                       Photo <span className='text-meta-1'>*</span>
@@ -157,21 +204,20 @@ const FormDataPegawai = () => {
                     />
                   </div>
                 </div>
-                {/* <!-- Form Data Pegawai --> */}
 
                 <div className='flex flex-col md:flex-row w-full gap-3 text-center'>
-                  <Link to="/" >
-                    <ButtonOne  >
+                  <Link to='/' >
+                    <ButtonOne>
                       <span>Simpan</span>
                     </ButtonOne>
                   </Link>
-                  <Link to="/admin/master-data/data-pegawai/form-data-pegawai" >
+                  <Link to='/admin/master-data/data-pegawai/form-data-pegawai' >
                     <ButtonTwo>
                       <span>Reset</span>
                     </ButtonTwo>
                   </Link>
-                  <Link to="/admin/master-data/data-pegawai" >
-                    <ButtonThree  >
+                  <Link to='/admin/master-data/data-pegawai' >
+                    <ButtonThree>
                       <span>Kembali</span>
                     </ButtonThree>
                   </Link>

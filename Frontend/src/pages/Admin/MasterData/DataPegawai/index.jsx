@@ -93,6 +93,9 @@ const DataPegawai = () => {
                                     Jenis Kelamin
                                 </th>
                                 <th className='py-4 px-4 font-medium text-black dark:text-white'>
+                                    Designation
+                                </th>
+                                <th className='py-4 px-4 font-medium text-black dark:text-white'>
                                     Tanggal Masuk
                                 </th>
                                 <th className='py-4 px-4 font-medium text-black dark:text-white'>
@@ -125,6 +128,9 @@ const DataPegawai = () => {
                                             <p className='text-black dark:text-white'>{dataPegawai.jenisKelamin}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
+                                            <p className='text-black dark:text-white'>{dataPegawai.designation}</p>
+                                        </td>
+                                        <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
                                             <p className='text-black dark:text-white'>{dataPegawai.tanggalMasuk}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
@@ -135,9 +141,9 @@ const DataPegawai = () => {
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
                                             <div className='flex items-center space-x-3.5'>
-                                                <button className='hover:text-black'>
+                                                <Link to={`/admin/master-data/data-pegawai/form-data-pegawai/${dataPegawai.id}`} className='hover:text-black'>
                                                     <FaRegEdit className="text-primary text-xl hover:text-black dark:hover:text-white" />
-                                                </button>
+                                                </Link>
                                                 <button className='hover:text-black'>
                                                     <BsTrash3 className="text-danger text-xl hover:text-black dark:hover:text-white" />
                                                 </button>
@@ -164,51 +170,23 @@ const DataPegawai = () => {
                         >
                             Prev
                         </button>
-                        {[...Array(Math.min(totalPages, 5))].map((_, i) => {
-                            const page = i + 1;
-                            if (page === currentPage) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="py-2 px-4 rounded-lg border border-primary bg-primary text-white font-semibold hover:bg-primary dark:text-white dark:bg-primary dark:hover:bg-primary"
-                                    >
-                                        {page}
-                                    </div>
-                                );
-                            } else if (page === 2 && currentPage > 4) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className="py-2 px-4 border border-gray-2 dark:bg-transparent text-black font-medium bg-gray dark:border-strokedark dark:text-white"
-                                    >
-                                        ...
-                                    </p>
-                                );
-                            } else if (page === totalPages - 1 && currentPage < totalPages - 3) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className="py-2 px-4 border border-gray-2 dark:bg-transparent text-black font-medium bg-gray dark:border-strokedark dark:text-white"
-                                    >
-                                        ...
-                                    </p>
-                                );
-                            } else if (
-                                page === 1 ||
-                                page === totalPages ||
-                                (page >= currentPage - 1 && page <= currentPage + 1)
-                            ) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="py-2 px-4 rounded-lg border border-gray-2 text-black dark:bg-transparent bg-gray font-medium dark:border-strokedark dark:text-white"
-                                    >
-                                        {page}
-                                    </div>
-                                );
-                            } else {
-                                return null;
-                            }
+                        {new Array(Math.min(totalPages, 5)).fill(null).map((_, index) => {
+                            const page = index + 1;
+                            return (
+                                <button
+                                    key={`page-${page}`}
+                                    onClick={() => {
+                                        setCurrentPage(page);
+                                        setStartIndex((page - 1) * ITEMS_PER_PAGE);
+                                        setEndIndex(page * ITEMS_PER_PAGE);
+                                    }}
+                                    className={page === currentPage
+                                        ? 'py-2 px-4 rounded-lg border border-primary bg-primary text-white font-semibold hover:bg-primary dark:text-white dark:bg-primary dark:hover:bg-primary'
+                                        : 'py-2 px-4 rounded-lg border border-gray-2 text-black dark:bg-transparent bg-gray font-medium dark:border-strokedark dark:text-white'}
+                                >
+                                    {page}
+                                </button>
+                            );
                         })}
 
                         <button

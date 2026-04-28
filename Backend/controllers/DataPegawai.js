@@ -1,7 +1,7 @@
 import DataPegawai from "../models/DataPegawaiModel.js";
 import argon2 from "argon2";
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 
 // menampilkan semua data Pegawai
 export const getDataPegawai = async (req, res) => {
@@ -9,7 +9,7 @@ export const getDataPegawai = async (req, res) => {
         const response = await DataPegawai.findAll({
             attributes: [
                 'id','nik', 'nama_pegawai',
-                'jenis_kelamin', 'jabatan', 'tanggal_masuk',
+                'jenis_kelamin', 'jabatan', 'designation', 'tanggal_masuk',
                 'status', 'photo', 'hak_akses'
             ]
         });
@@ -25,7 +25,7 @@ export const getDataPegawaiByID = async (req, res) => {
         const response = await DataPegawai.findOne({
             attributes: [
                 'id', 'nik', 'nama_pegawai',
-                'jenis_kelamin', 'jabatan', 'tanggal_masuk',
+                'jenis_kelamin', 'jabatan', 'designation', 'tanggal_masuk',
                 'status', 'photo', 'hak_akses'
             ],
             where: {
@@ -42,18 +42,17 @@ export const getDataPegawaiByID = async (req, res) => {
     }
 }
 
-// TODO: method untuk mencari data pegawai berdasarkan NIK
-
-// TODO: method untuk mencarai data pegawai berdasarkan Nama
-
 //  method untuk tambah data Pegawai
 export const createDataPegawai = async (req, res) => {
     const {
             nik, nama_pegawai,
             username, password, confPassword, jenis_kelamin,
-            jabatan, tanggal_masuk,
+            jabatan, designation, tanggal_masuk,
             status, hak_akses
         } = req.body;
+
+        const allowedDesignations = ['Mason', 'Electrician', 'Plumber', 'Supervisor', 'Helper'];
+        if (!designation || !allowedDesignations.includes(designation)) return res.status(400).json({msg: 'Designation harus dipilih'});
 
     if(password !== confPassword) return res.status(400).json({msg: "Password dan Confirm Password tidak cocok"});
 
@@ -82,6 +81,7 @@ export const createDataPegawai = async (req, res) => {
                 password: hashPassword,
                 jenis_kelamin: jenis_kelamin,
                 jabatan: jabatan,
+                designation: designation,
                 tanggal_masuk: tanggal_masuk,
                 status: status,
                 photo: fileName,
@@ -103,13 +103,16 @@ export const updateDataPegawai = async (req, res) => {
         }
     });
 
-    if (!pegawai) return res.staus(404).json({msg: "Data pegawai tidak ditemukan"});
+        if (!pegawai) return res.status(404).json({msg: "Data pegawai tidak ditemukan"});
     const {
             nik, nama_pegawai,
             username, password, confPassword, jenis_kelamin,
-            jabatan, tanggal_masuk,
+            jabatan, designation, tanggal_masuk,
             status, hak_akses
         } = req.body;
+
+        const allowedDesignations = ['Mason', 'Electrician', 'Plumber', 'Supervisor', 'Helper'];
+        if (!designation || !allowedDesignations.includes(designation)) return res.status(400).json({msg: 'Designation harus dipilih'});
 
     let fileName = "";
     if(req.files === null){
@@ -150,6 +153,7 @@ export const updateDataPegawai = async (req, res) => {
             password: hashPassword,
             jenis_kelamin: jenis_kelamin,
             jabatan: jabatan,
+            designation: designation,
             tanggal_masuk: tanggal_masuk,
             status: status,
             photo: fileName,

@@ -91,6 +91,7 @@ CREATE TABLE `data_pegawai` (
   `password` varchar(255) DEFAULT NULL,
   `jenis_kelamin` varchar(15) NOT NULL,
   `jabatan` varchar(50) NOT NULL,
+  `designation` varchar(50) NOT NULL,
   `tanggal_masuk` varchar(255) NOT NULL,
   `status` varchar(50) NOT NULL,
   `photo` varchar(100) NOT NULL,
@@ -104,9 +105,9 @@ CREATE TABLE `data_pegawai` (
 -- Dumping data for table `data_pegawai`
 --
 
-INSERT INTO `data_pegawai` (`id`, `id_pegawai`, `nik`, `nama_pegawai`, `username`, `password`, `jenis_kelamin`, `jabatan`, `tanggal_masuk`, `status`, `photo`, `url`, `hak_akses`, `createdAt`, `updatedAt`) VALUES
-(1, 'fa2b8473-ddcd-4c5a-b985-391a6dc87920', '223344', 'Aldi', 'aldi', '$argon2id$v=19$m=65536,t=3,p=4$N9YlzB9yQo1n5rHsZUSkIA$afLOo5e7vkn1gPfpF3fCr9Skjv5cVD+KKAHvWwHbBBI', 'Laki-Laki', 'HRD', '01-02-23', 'karyawan tetap', '87e74cc6606ab4802b48d59acbbcff71.jpg', 'http://localhost:5000/images/87e74cc6606ab4802b48d59acbbcff71.jpg', 'admin', '2023-05-21 13:08:09', '2023-05-21 13:08:09'),
-(2, 'f6001a36-d9a2-437f-b0e7-103f817c1c61', '334455', 'Budi', 'budi', '$argon2id$v=19$m=65536,t=3,p=4$1ScBJEZZgvxMIbYNRxhZDg$OAtL4BB+hufFV6MsYDKkb1TJ2BfABK74kweZrntw/dQ', 'Laki-Laki', 'Operator Produksi', '01-02-23', 'karyawan tetap', '87e74cc6606ab4802b48d59acbbcff71.jpg', 'http://localhost:5000/images/87e74cc6606ab4802b48d59acbbcff71.jpg', 'pegawai', '2023-05-21 14:04:35', '2023-05-21 14:04:35');
+INSERT INTO `data_pegawai` (`id`, `id_pegawai`, `nik`, `nama_pegawai`, `username`, `password`, `jenis_kelamin`, `jabatan`, `designation`, `tanggal_masuk`, `status`, `photo`, `url`, `hak_akses`, `createdAt`, `updatedAt`) VALUES
+(1, 'fa2b8473-ddcd-4c5a-b985-391a6dc87920', '223344', 'Aldi', 'aldi', '$argon2id$v=19$m=65536,t=3,p=4$N9YlzB9yQo1n5rHsZUSkIA$afLOo5e7vkn1gPfpF3fCr9Skjv5cVD+KKAHvWwHbBBI', 'Laki-Laki', 'HRD', 'Supervisor', '01-02-23', 'karyawan tetap', '87e74cc6606ab4802b48d59acbbcff71.jpg', 'http://localhost:5000/images/87e74cc6606ab4802b48d59acbbcff71.jpg', 'admin', '2023-05-21 13:08:09', '2023-05-21 13:08:09'),
+(2, 'f6001a36-d9a2-437f-b0e7-103f817c1c61', '334455', 'Budi', 'budi', '$argon2id$v=19$m=65536,t=3,p=4$1ScBJEZZgvxMIbYNRxhZDg$OAtL4BB+hufFV6MsYDKkb1TJ2BfABK74kweZrntw/dQ', 'Laki-Laki', 'Operator Produksi', 'Helper', '01-02-23', 'karyawan tetap', '87e74cc6606ab4802b48d59acbbcff71.jpg', 'http://localhost:5000/images/87e74cc6606ab4802b48d59acbbcff71.jpg', 'pegawai', '2023-05-21 14:04:35', '2023-05-21 14:04:35');
 
 -- --------------------------------------------------------
 
