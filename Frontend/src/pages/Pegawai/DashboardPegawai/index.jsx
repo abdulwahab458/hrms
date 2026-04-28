@@ -1,12 +1,15 @@
 import React from 'react';
 import DefaultLayoutPegawai from '../../../layout/DefaultLayoutPegawai';
-import { BreadcrumbPegawai } from '../../../components';
+import { BreadcrumbPegawai, CardFive } from '../../../components';
 import PegawaiPeople from '../../../assets/images/user/gilbert.png'
 
 const DashboardPegawai = () => {
     return (
         <DefaultLayoutPegawai>
             <BreadcrumbPegawai pageName='Dashboard' />
+            <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
+                <CardFive />
+            </div>
             <div className="mt-6">
                 <h2 className="px-4 py-2 text-meta-3 font-medium text-center md:text-left">
                     Selamat Datang, Anda Login Sebagai Pegawai.

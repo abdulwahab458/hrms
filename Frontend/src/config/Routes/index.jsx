@@ -2,6 +2,7 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import NotFound from '../../components/molecules/NotFound'
 import FormDataPegawai from '../../components/molecules/Form/FormDataPegawai'
+import FormOvertime from '../../components/molecules/Form/FormOvertime'
 import FormDataJabatan from '../../components/molecules/Form/FormDataJabatan'
 import FormSettingPotonganGaji from '../../components/molecules/Form/FormSettingPotonganGaji'
 import {
@@ -29,6 +30,8 @@ const AppRoutes = () => {
       <Route path='/admin/transaksi/setting-potongan-gaji' element={<SettingPotonganGaji />} />
       <Route path='/admin/transaksi/setting-potongan-gaji/form-setting-potongan-gaji' element={<FormSettingPotonganGaji />} />
       <Route path='/admin/transaksi/data-gaji' element={<DataGaji />} />
+      <Route path='/overtime' element={<FormOvertime />} />
+      <Route path='/admin/transaksi/overtime/form-overtime' element={<FormOvertime />} />
       {/* Laporan Admin */}
       <Route path='/admin/laporan/laporan-gaji' element={<LaporanGaji />} />
       <Route path='/admin/laporan/laporan-absensi' element={<LaporanAbsensi />} />

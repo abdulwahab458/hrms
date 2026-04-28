@@ -38,8 +38,13 @@ export const createOvertime = async (req, res) => {
             return res.status(400).json({ msg: "reason must be at least 10 characters" });
         }
 
-        // employee exists
-        const employee = await DataPegawai.findOne({ where: { id_pegawai: employeeId } });
+        // employee exists: try id_pegawai (uuid) first, then numeric id
+        let employee = await DataPegawai.findOne({ where: { id_pegawai: employeeId } });
+        if (!employee) {
+            // try numeric id fallback
+            employee = await DataPegawai.findOne({ where: { id: employeeId } });
+        }
+
         if (!employee) {
             return res.status(404).json({ msg: "employee not found" });
         }

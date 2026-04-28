@@ -4,7 +4,7 @@ import SidebarLinkGroup from '../SidebarLinkGroup'
 import Logo from '../../../../assets/images/logo/logo.svg'
 import { AiOutlineArrowLeft } from 'react-icons/ai'
 import { RxDashboard } from 'react-icons/rx'
-import { FaRegMoneyBillAlt } from 'react-icons/fa'
+import { FaRegMoneyBillAlt, FaRegClock } from 'react-icons/fa'
 import { FiSettings } from 'react-icons/fi'
 import { MdKeyboardArrowDown } from 'react-icons/md'
 
@@ -109,6 +109,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 </NavLink>
               </li>
               {/* <!-- Data Gaji Pegawai --> */}
+
+              {/* <!-- Overtime --> */}
+              <li>
+                <NavLink
+                  to='/overtime'
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${pathname.includes('overtime') &&
+                    'bg-graydark dark:bg-meta-4'
+                    }`}
+                >
+                  <FaRegClock />
+                  Overtime
+                </NavLink>
+              </li>
+              {/* <!-- Overtime --> */}
 
               {/* <!-- Pengaturan Admin --> */}
               <SidebarLinkGroup
