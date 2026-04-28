@@ -26,10 +26,12 @@ const AppRoutes = () => {
       <Route path='/admin/master-data/data-pegawai/form-data-pegawai/:id' element={<FormDataPegawai />} />
       <Route path='/admin/master-data/data-jabatan' element={<DataJabatan />} />
       <Route path='/admin/master-data/data-jabatan/form-data-jabatan' element={<FormDataJabatan />} />
+      <Route path='/admin/master-data/data-jabatan/form-data-jabatan/:id' element={<FormDataJabatan />} />
       {/* Transaksi Admin */}
       <Route path='/admin/transaksi/data-absensi' element={<DataAbsensi />} />
       <Route path='/admin/transaksi/setting-potongan-gaji' element={<SettingPotonganGaji />} />
       <Route path='/admin/transaksi/setting-potongan-gaji/form-setting-potongan-gaji' element={<FormSettingPotonganGaji />} />
+      <Route path='/admin/transaksi/setting-potongan-gaji/form-setting-potongan-gaji/:id' element={<FormSettingPotonganGaji />} />
       <Route path='/admin/transaksi/data-gaji' element={<DataGaji />} />
       <Route path='/overtime' element={<FormOvertime />} />
       <Route path='/admin/transaksi/overtime/form-overtime' element={<FormOvertime />} />

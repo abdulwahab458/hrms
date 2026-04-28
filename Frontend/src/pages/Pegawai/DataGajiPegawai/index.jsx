@@ -1,42 +1,65 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DefaultLayoutPegawai from '../../../layout/DefaultLayoutPegawai';
-import DataGajiPegawaiPeople from '../../../utils/DataGajiPegawaiPeople';
 import { BreadcrumbPegawai } from '../../../components';
-import { TfiPrinter } from 'react-icons/tfi'
+import { TfiPrinter } from 'react-icons/tfi';
 
 const ITEMS_PER_PAGE = 4;
 
 const DataGajiPegawai = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [startIndex, setStartIndex] = useState(0);
-    const [endIndex, setEndIndex] = useState(ITEMS_PER_PAGE);
-    const [dataGajiPegawai, setDataGajiPegawai] = useState([]);
-
-    const totalPages = Math.ceil(DataGajiPegawaiPeople.length / ITEMS_PER_PAGE);
+    const [salaryList, setSalaryList] = useState([]);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
-        setDataGajiPegawai(DataGajiPegawaiPeople.slice(startIndex, endIndex));
-    }, [startIndex, endIndex]);
+        const fetchSalary = async () => {
+            try {
+                const response = await fetch('/data_gaji/pegawai', {
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.msg || 'Gagal memuat data gaji');
+                }
+
+                const data = await response.json();
+                setSalaryList(data);
+            } catch (error) {
+                setMessage(error.message);
+            }
+        };
+
+        fetchSalary();
+    }, []);
+
+    const totalPages = Math.max(1, Math.ceil(salaryList.length / ITEMS_PER_PAGE));
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const visibleSalary = useMemo(() => salaryList.slice(startIndex, endIndex), [salaryList, startIndex, endIndex]);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     const goToPrevPage = () => {
         if (currentPage > 1) {
             setCurrentPage((prev) => prev - 1);
-            setStartIndex((prev) => prev - ITEMS_PER_PAGE);
-            setEndIndex((prev) => prev - ITEMS_PER_PAGE);
         }
     };
 
     const goToNextPage = () => {
         if (currentPage < totalPages) {
             setCurrentPage((prev) => prev + 1);
-            setStartIndex((prev) => prev + ITEMS_PER_PAGE);
-            setEndIndex((prev) => prev + ITEMS_PER_PAGE);
         }
     };
 
     return (
         <DefaultLayoutPegawai>
             <BreadcrumbPegawai pageName='Data Gaji' />
+
+            {message ? <p className='mb-4 rounded border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary'>{message}</p> : null}
 
             <div className='rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 mt-6'>
                 <div className='max-w-full overflow-x-auto py-4'>
@@ -67,31 +90,31 @@ const DataGajiPegawai = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {dataGajiPegawai.map((dataGajiPegawai) => {
+                            {visibleSalary.map((salary) => {
                                 return (
-                                    <tr key={dataGajiPegawai.id}>
+                                    <tr key={salary.id}>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGajiPegawai.bulanTahun}</p>
+                                            <p className='text-black dark:text-white'>{salary.bulanTahun}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGajiPegawai.gajiPokok}</p>
+                                            <p className='text-black dark:text-white'>{salary.gajiPokok}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGajiPegawai.tunjanganTransport}</p>
+                                            <p className='text-black dark:text-white'>{salary.tunjanganTransport}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGajiPegawai.uangMakan}</p>
+                                            <p className='text-black dark:text-white'>{salary.uangMakan}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGajiPegawai.jumlahPotongan}</p>
+                                            <p className='text-black dark:text-white'>{salary.jumlahPotongan}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGajiPegawai.totalGaji}</p>
+                                            <p className='text-black dark:text-white'>{salary.totalGaji}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark text-center'>
                                             <div className='items-center '>
-                                                <button className='hover:text-black'>
-                                                    <TfiPrinter className="text-primary text-xl hover:text-black dark:hover:text-white" />
+                                                <button type='button' className='hover:text-black'>
+                                                    <TfiPrinter className='text-primary text-xl hover:text-black dark:hover:text-white' />
                                                 </button>
                                             </div>
                                         </td>
@@ -105,7 +128,7 @@ const DataGajiPegawai = () => {
                 <div className='flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between'>
                     <div className='flex items-center space-x-2'>
                         <span className='text-gray-5 dark:text-gray-4 text-sm py-4'>
-                            Showing {startIndex}-{endIndex} of {DataGajiPegawaiPeople.length} Data Gaji
+                            Showing {salaryList.length === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, salaryList.length)} of {salaryList.length} Data Gaji
                         </span>
                     </div>
                     <div className='flex space-x-2 py-4'>
@@ -116,52 +139,17 @@ const DataGajiPegawai = () => {
                         >
                             Prev
                         </button>
-                        {[...Array(Math.min(totalPages, 5))].map((_, i) => {
-                            const page = i + 1;
-                            if (page === currentPage) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="py-2 px-4 rounded-lg border border-primary bg-primary text-white font-semibold hover:bg-primary dark:text-white dark:bg-primary dark:hover:bg-primary"
-                                    >
-                                        {page}
-                                    </div>
-                                );
-                            } else if (page === 2 && currentPage > 4) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className="py-2 px-4 border border-gray-2 dark:bg-transparent text-black font-medium bg-gray dark:border-strokedark dark:text-white"
-                                    >
-                                        ...
-                                    </p>
-                                );
-                            } else if (page === totalPages - 1 && currentPage < totalPages - 3) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className="py-2 px-4 border border-gray-2 dark:bg-transparent text-black font-medium bg-gray dark:border-strokedark dark:text-white"
-                                    >
-                                        ...
-                                    </p>
-                                );
-                            } else if (
-                                page === 1 ||
-                                page === totalPages ||
-                                (page >= currentPage - 1 && page <= currentPage + 1)
-                            ) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="py-2 px-4 rounded-lg border border-gray-2 text-black dark:bg-transparent bg-gray font-medium dark:border-strokedark dark:text-white"
-                                    >
-                                        {page}
-                                    </div>
-                                );
-                            } else {
-                                return null;
-                            }
-                        })}
+                        {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => index + 1).map((page) => (
+                            <button
+                                key={`page-${page}`}
+                                onClick={() => setCurrentPage(page)}
+                                className={page === currentPage
+                                    ? 'py-2 px-4 rounded-lg border border-primary bg-primary text-white font-semibold hover:bg-primary dark:text-white dark:bg-primary dark:hover:bg-primary'
+                                    : 'py-2 px-4 rounded-lg border border-gray-2 text-black dark:bg-transparent bg-gray font-medium dark:border-strokedark dark:text-white'}
+                            >
+                                {page}
+                            </button>
+                        ))}
 
                         <button
                             disabled={currentPage === totalPages}
@@ -174,7 +162,7 @@ const DataGajiPegawai = () => {
                 </div>
             </div>
         </DefaultLayoutPegawai>
-    )
-}
+    );
+};
 
 export default DataGajiPegawai;

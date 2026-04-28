@@ -12,6 +12,8 @@ import DataJabatanRoute from './routes/DataJabatanRoute.js';
 import AuthRoute from './routes/AuthRoute.js';
 import DataKehadiranRoute from './routes/DataKehadiranRoute.js';
 import OvertimeRoute from './routes/OvertimeRoute.js';
+import PotonganGajiRoute from './routes/PotonganGajiRoute.js';
+import SalaryRoute from './routes/SalaryRoute.js';
 
 
 const app = express();
@@ -50,6 +52,8 @@ app.use(DataJabatanRoute);
 app.use(AuthRoute);
 app.use(DataKehadiranRoute);
 app.use(OvertimeRoute);
+app.use(PotonganGajiRoute);
+app.use(SalaryRoute);
 
 app.listen(process.env.APP_PORT, () => {
     console.log('Server up and running...');

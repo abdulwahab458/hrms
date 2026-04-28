@@ -10,7 +10,7 @@ export const getDataPegawai = async (req, res) => {
             attributes: [
                 'id','nik', 'nama_pegawai',
                 'jenis_kelamin', 'jabatan', 'designation', 'tanggal_masuk',
-                'status', 'photo', 'hak_akses'
+                'status', 'photo', 'url', 'hak_akses'
             ]
         });
         res.status(200).json(response);
@@ -26,7 +26,7 @@ export const getDataPegawaiByID = async (req, res) => {
             attributes: [
                 'id', 'nik', 'nama_pegawai',
                 'jenis_kelamin', 'jabatan', 'designation', 'tanggal_masuk',
-                'status', 'photo', 'hak_akses'
+                'status', 'photo', 'url', 'hak_akses'
             ],
             where: {
                 id: req.params.id
@@ -56,7 +56,7 @@ export const createDataPegawai = async (req, res) => {
 
     if(password !== confPassword) return res.status(400).json({msg: "Password dan Confirm Password tidak cocok"});
 
-    if (req.files === null || req.files.photo === undefined) {
+    if (!req.files?.photo) {
         return res.status(400).json({msg: "No File Uploaded"});
     }
     const file = req.files.photo;
@@ -115,14 +115,12 @@ export const updateDataPegawai = async (req, res) => {
         if (!designation || !allowedDesignations.includes(designation)) return res.status(400).json({msg: 'Designation harus dipilih'});
 
     let fileName = "";
-    if(req.files === null){
-        fileName = pegawai.photo;
-    }else{
+    if (req.files?.photo) {
         const file = req.files.photo;
         const fileSize = file.data.length;
         const ext = path.extname(file.name);
         fileName = file.md5 + ext;
-        const allowedType = ['.png', '.jpg', 'jpeg'];
+        const allowedType = ['.png', '.jpg', '.jpeg'];
 
         if(!allowedType.includes(ext.toLocaleLowerCase())) return res.status(422).json({msg: "invalid Images"});
 
@@ -134,6 +132,8 @@ export const updateDataPegawai = async (req, res) => {
         file.mv(`./public/images/${fileName}`, (err)=>{
             if(err) return res.status(500).json({msg: err.message});
         });
+    } else {
+        fileName = pegawai.photo;
     }
 
     const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;

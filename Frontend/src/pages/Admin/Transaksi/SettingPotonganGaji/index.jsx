@@ -1,48 +1,104 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DefaultLayoutAdmin from '../../../../layout/DefaultLayoutAdmin';
-import DataSettingPotonganGaji from '../../../../utils/DataSettingPotonganGaji';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import { BreadcrumbAdmin, ButtonOne } from '../../../../components';
-import { FaRegEdit, FaPlus } from 'react-icons/fa'
-import { BsTrash3 } from 'react-icons/bs'
-import { BiSearch } from 'react-icons/bi'
+import { FaRegEdit, FaPlus } from 'react-icons/fa';
+import { BsTrash3 } from 'react-icons/bs';
+import { BiSearch } from 'react-icons/bi';
 
 const ITEMS_PER_PAGE = 4;
 
 const SettingPotonganGaji = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [startIndex, setStartIndex] = useState(0);
-    const [endIndex, setEndIndex] = useState(ITEMS_PER_PAGE);
-    const [settingPotonganGaji, setSettingPotonganGaji] = useState([]);
-
-    const totalPages = Math.ceil(DataSettingPotonganGaji.length / ITEMS_PER_PAGE);
+    const [potonganGajiList, setPotonganGajiList] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
-        setSettingPotonganGaji(DataSettingPotonganGaji.slice(startIndex, endIndex));
-    }, [startIndex, endIndex]);
+        const fetchPotonganGaji = async () => {
+            try {
+                const response = await fetch('/potongan_gaji', {
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.msg || 'Gagal memuat data potongan gaji');
+                }
+
+                const data = await response.json();
+                setPotonganGajiList(data);
+            } catch (error) {
+                setMessage(error.message);
+            }
+        };
+
+        fetchPotonganGaji();
+    }, []);
+
+    const filteredPotonganGaji = useMemo(() => {
+        return potonganGajiList.filter((item) => {
+            const searchValue = `${item.potongan ?? ''} ${item.jml_potongan ?? ''}`.toLowerCase();
+            return searchValue.includes(searchTerm.toLowerCase());
+        });
+    }, [potonganGajiList, searchTerm]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredPotonganGaji.length / ITEMS_PER_PAGE));
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const visiblePotonganGaji = filteredPotonganGaji.slice(startIndex, endIndex);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     const goToPrevPage = () => {
         if (currentPage > 1) {
             setCurrentPage((prev) => prev - 1);
-            setStartIndex((prev) => prev - ITEMS_PER_PAGE);
-            setEndIndex((prev) => prev - ITEMS_PER_PAGE);
         }
     };
 
     const goToNextPage = () => {
         if (currentPage < totalPages) {
             setCurrentPage((prev) => prev + 1);
-            setStartIndex((prev) => prev + ITEMS_PER_PAGE);
-            setEndIndex((prev) => prev + ITEMS_PER_PAGE);
         }
     };
 
+    const handleDelete = async (id) => {
+        const confirmDelete = globalThis.confirm('Hapus data potongan gaji ini?');
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/potongan_gaji/${id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.msg || 'Gagal menghapus data potongan gaji');
+            }
+
+            setPotonganGajiList((currentList) => currentList.filter((item) => item.id !== id));
+            setMessage(result.msg || 'Data potongan gaji berhasil dihapus');
+        } catch (error) {
+            setMessage(error.message);
+        }
+    };
 
     return (
         <DefaultLayoutAdmin>
             <BreadcrumbAdmin pageName='Setting Potongan Gaji' />
-            <Link to="/admin/transaksi/setting-potongan-gaji/form-setting-potongan-gaji" >
-                <ButtonOne  >
+            <Link to='/admin/transaksi/setting-potongan-gaji/form-setting-potongan-gaji'>
+                <ButtonOne>
                     <span>Tambah Potongan</span>
                     <span>
                         <FaPlus />
@@ -50,11 +106,14 @@ const SettingPotonganGaji = () => {
                 </ButtonOne>
             </Link>
             <div className='rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 mt-6'>
-                <div className="flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between">
-                    <div className="relative flex-2 mb-4 md:mb-0">
+                {message ? <p className='mb-4 rounded border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary'>{message}</p> : null}
+                <div className='flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between'>
+                    <div className='relative flex-2 mb-4 md:mb-0'>
                         <input
                             type='text'
                             placeholder='Type to search..'
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
                             className='rounded-lg border-[1.5px] border-stroke bg-transparent py-2 pl-10 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary left-0'
                         />
                         <span className='absolute left-2 py-3 text-xl'>
@@ -79,22 +138,22 @@ const SettingPotonganGaji = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {settingPotonganGaji.map((settingPotonganGaji) => {
+                            {visiblePotonganGaji.map((item) => {
                                 return (
-                                    <tr key={settingPotonganGaji.id}>
+                                    <tr key={item.id}>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{settingPotonganGaji.potonganGaji}</p>
+                                            <p className='text-black dark:text-white'>{item.potongan}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{settingPotonganGaji.jumlahPotongan}</p>
+                                            <p className='text-black dark:text-white'>{item.jml_potongan}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 dark:border-strokedark'>
                                             <div className='flex items-center space-x-3.5'>
-                                                <button className='hover:text-black'>
-                                                    <FaRegEdit className="text-primary text-xl hover:text-black dark:hover:text-white" />
-                                                </button>
-                                                <button className='hover:text-black'>
-                                                    <BsTrash3 className="text-danger text-xl hover:text-black dark:hover:text-white" />
+                                                <Link to={`/admin/transaksi/setting-potongan-gaji/form-setting-potongan-gaji/${item.id}`} className='hover:text-black'>
+                                                    <FaRegEdit className='text-primary text-xl hover:text-black dark:hover:text-white' />
+                                                </Link>
+                                                <button type='button' onClick={() => handleDelete(item.id)} className='hover:text-black'>
+                                                    <BsTrash3 className='text-danger text-xl hover:text-black dark:hover:text-white' />
                                                 </button>
                                             </div>
                                         </td>
@@ -108,7 +167,7 @@ const SettingPotonganGaji = () => {
                 <div className='flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between'>
                     <div className='flex items-center space-x-2'>
                         <span className='text-gray-5 dark:text-gray-4 text-sm py-4'>
-                            Showing {startIndex}-{endIndex} of {DataSettingPotonganGaji.length} Setting Potongan Gaji
+                            Showing {filteredPotonganGaji.length === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, filteredPotonganGaji.length)} of {filteredPotonganGaji.length} Setting Potongan Gaji
                         </span>
                     </div>
                     <div className='flex space-x-2 py-4'>
@@ -119,52 +178,17 @@ const SettingPotonganGaji = () => {
                         >
                             Prev
                         </button>
-                        {[...Array(Math.min(totalPages, 5))].map((_, i) => {
-                            const page = i + 1;
-                            if (page === currentPage) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="py-2 px-4 rounded-lg border border-primary bg-primary text-white font-semibold hover:bg-primary dark:text-white dark:bg-primary dark:hover:bg-primary"
-                                    >
-                                        {page}
-                                    </div>
-                                );
-                            } else if (page === 2 && currentPage > 4) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className="py-2 px-4 border border-gray-2 dark:bg-transparent text-black font-medium bg-gray dark:border-strokedark dark:text-white"
-                                    >
-                                        ...
-                                    </p>
-                                );
-                            } else if (page === totalPages - 1 && currentPage < totalPages - 3) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className="py-2 px-4 border border-gray-2 dark:bg-transparent text-black font-medium bg-gray dark:border-strokedark dark:text-white"
-                                    >
-                                        ...
-                                    </p>
-                                );
-                            } else if (
-                                page === 1 ||
-                                page === totalPages ||
-                                (page >= currentPage - 1 && page <= currentPage + 1)
-                            ) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="py-2 px-4 rounded-lg border border-gray-2 text-black dark:bg-transparent bg-gray font-medium dark:border-strokedark dark:text-white"
-                                    >
-                                        {page}
-                                    </div>
-                                );
-                            } else {
-                                return null;
-                            }
-                        })}
+                        {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => index + 1).map((page) => (
+                            <button
+                                key={`page-${page}`}
+                                onClick={() => setCurrentPage(page)}
+                                className={page === currentPage
+                                    ? 'py-2 px-4 rounded-lg border border-primary bg-primary text-white font-semibold hover:bg-primary dark:text-white dark:bg-primary dark:hover:bg-primary'
+                                    : 'py-2 px-4 rounded-lg border border-gray-2 text-black dark:bg-transparent bg-gray font-medium dark:border-strokedark dark:text-white'}
+                            >
+                                {page}
+                            </button>
+                        ))}
 
                         <button
                             disabled={currentPage === totalPages}
@@ -177,7 +201,7 @@ const SettingPotonganGaji = () => {
                 </div>
             </div>
         </DefaultLayoutAdmin>
-    )
-}
+    );
+};
 
 export default SettingPotonganGaji;

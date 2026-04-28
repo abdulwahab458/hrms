@@ -1,41 +1,74 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DefaultLayoutAdmin from '../../../../layout/DefaultLayoutAdmin';
-import DataGajiPegawai from '../../../../utils/DataGajiPegawai';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 import { BreadcrumbAdmin, ButtonOne } from '../../../../components';
-import { FaRegEdit } from 'react-icons/fa'
-import { BsTrash3 } from 'react-icons/bs'
-import { BiSearch } from 'react-icons/bi'
-import { MdOutlineKeyboardArrowDown } from 'react-icons/md'
-import { TfiEye, TfiPrinter } from 'react-icons/tfi'
+import { FaRegEdit, FaPlus } from 'react-icons/fa';
+import { BsTrash3 } from 'react-icons/bs';
+import { BiSearch } from 'react-icons/bi';
+import { MdOutlineKeyboardArrowDown } from 'react-icons/md';
+import { TfiEye, TfiPrinter } from 'react-icons/tfi';
 
 const ITEMS_PER_PAGE = 4;
 
 const DataGaji = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [startIndex, setStartIndex] = useState(0);
-    const [endIndex, setEndIndex] = useState(ITEMS_PER_PAGE);
-    const [dataGaji, setDataGaji] = useState([]);
-
-    const totalPages = Math.ceil(DataGajiPegawai.length / ITEMS_PER_PAGE);
+    const [salaryList, setSalaryList] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
-        setDataGaji(DataGajiPegawai.slice(startIndex, endIndex));
-    }, [startIndex, endIndex]);
+        const fetchSalary = async () => {
+            try {
+                const response = await fetch('/data_gaji', {
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.msg || 'Gagal memuat data gaji');
+                }
+
+                const data = await response.json();
+                setSalaryList(data);
+            } catch (error) {
+                setMessage(error.message);
+            }
+        };
+
+        fetchSalary();
+    }, []);
+
+    const filteredSalary = useMemo(() => {
+        return salaryList.filter((item) => {
+            const searchValue = `${item.nik ?? ''} ${item.nama_pegawai ?? ''} ${item.jenis_kelamin ?? ''} ${item.titleJabatan ?? ''}`.toLowerCase();
+            return searchValue.includes(searchTerm.toLowerCase());
+        });
+    }, [salaryList, searchTerm]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredSalary.length / ITEMS_PER_PAGE));
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const visibleSalary = filteredSalary.slice(startIndex, endIndex);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     const goToPrevPage = () => {
         if (currentPage > 1) {
             setCurrentPage((prev) => prev - 1);
-            setStartIndex((prev) => prev - ITEMS_PER_PAGE);
-            setEndIndex((prev) => prev - ITEMS_PER_PAGE);
         }
     };
 
     const goToNextPage = () => {
         if (currentPage < totalPages) {
             setCurrentPage((prev) => prev + 1);
-            setStartIndex((prev) => prev + ITEMS_PER_PAGE);
-            setEndIndex((prev) => prev + ITEMS_PER_PAGE);
         }
     };
 
@@ -50,51 +83,53 @@ const DataGaji = () => {
                     </h3>
                 </div>
 
-                <div className="flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between">
-                    <div className="relative w-full md:w-1/4 md:mr-2 mb-4 md:mb-0">
+                {message ? <p className='mt-4 rounded border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary'>{message}</p> : null}
+
+                <div className='flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between'>
+                    <div className='relative w-full md:w-1/4 md:mr-2 mb-4 md:mb-0'>
                         <div className='relative'><span className='px-4'> Bulan</span>
                             <span className='absolute top-1/2 left-55 z-30 -translate-y-1/2 text-xl'>
                                 <MdOutlineKeyboardArrowDown />
                             </span>
                             <select className='relative appearance-none rounded border border-stroke bg-transparent py-2 px-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input'>
                                 <option value=''>Pilih Bulan</option>
-                                <option value=''>Januari</option>
-                                <option value=''>Februari</option>
-                                <option value=''>Maret</option>
-                                <option value=''>April</option>
-                                <option value=''>Mei</option>
-                                <option value=''>Juni</option>
-                                <option value=''>Juli</option>
-                                <option value=''>Agustus</option>
-                                <option value=''>September</option>
-                                <option value=''>Oktober</option>
-                                <option value=''>November</option>
-                                <option value=''>Desember</option>
+                                <option value='Januari'>Januari</option>
+                                <option value='Februari'>Februari</option>
+                                <option value='Maret'>Maret</option>
+                                <option value='April'>April</option>
+                                <option value='Mei'>Mei</option>
+                                <option value='Juni'>Juni</option>
+                                <option value='Juli'>Juli</option>
+                                <option value='Agustus'>Agustus</option>
+                                <option value='September'>September</option>
+                                <option value='Oktober'>Oktober</option>
+                                <option value='November'>November</option>
+                                <option value='Desember'>Desember</option>
                             </select>
                         </div>
                     </div>
-                    <div className="relative w-full md:w-1/4 md:mr-2 mb-4 md:mb-0">
+                    <div className='relative w-full md:w-1/4 md:mr-2 mb-4 md:mb-0'>
                         <div className='relative'><span className='px-4'>Tahun</span>
                             <span className='absolute top-1/2 left-55 z-30 -translate-y-1/2 text-xl'>
                                 <MdOutlineKeyboardArrowDown />
                             </span>
                             <select className='relative appearance-none rounded border border-stroke bg-transparent py-2 px-12 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input'>
                                 <option value=''>Pilih Tahun</option>
-                                <option value=''>2020</option>
-                                <option value=''>2021</option>
-                                <option value=''>2022</option>
-                                <option value=''>2023</option>
-                                <option value=''>2024</option>
-                                <option value=''>2025</option>
-                                <option value=''>2026</option>
-                                <option value=''>2027</option>
+                                <option value='2020'>2020</option>
+                                <option value='2021'>2021</option>
+                                <option value='2022'>2022</option>
+                                <option value='2023'>2023</option>
+                                <option value='2024'>2024</option>
+                                <option value='2025'>2025</option>
+                                <option value='2026'>2026</option>
+                                <option value='2027'>2027</option>
                             </select>
                         </div>
                     </div>
                     <div className='flex flex-col md:flex-row w-full md:w-1/2 justify-between text-center'>
-                        <div className="relative w-full md:w-1/2 mb-4 md:mb-0 ">
-                            <Link to="/admin/transaksi/data-gaji">
-                                <ButtonOne className="bg-primary">
+                        <div className='relative w-full md:w-1/2 mb-4 md:mb-0 '>
+                            <Link to='/admin/transaksi/data-gaji'>
+                                <ButtonOne className='bg-primary'>
                                     <span>Tampilkan Data</span>
                                     <span>
                                         <TfiEye />
@@ -102,8 +137,8 @@ const DataGaji = () => {
                                 </ButtonOne>
                             </Link>
                         </div>
-                        <div className="relative w-full md:w-1/2  mb-4 md:mb-0">
-                            <Link to="/admin/transaksi/data-gaji">
+                        <div className='relative w-full md:w-1/2  mb-4 md:mb-0'>
+                            <Link to='/admin/transaksi/data-gaji'>
                                 <ButtonOne>
                                     <span>Cetak Daftar Gaji</span>
                                     <span>
@@ -115,18 +150,19 @@ const DataGaji = () => {
                     </div>
                 </div>
 
-                <div className="bg-gray-2 text-left dark:bg-meta-4 mt-6">
-                    <h2 className="px-4 py-2 text-black dark:text-white">Menampilkan Data Gaji Pegawai Bulan:
-                        <span className="font-medium"> April</span> Tahun:<span className="font-medium"> 2023</span></h2>
+                <div className='bg-gray-2 text-left dark:bg-meta-4 mt-6'>
+                    <h2 className='px-4 py-2 text-black dark:text-white'>Menampilkan Data Gaji Pegawai</h2>
                 </div>
             </div>
 
             <div className='rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 mt-6'>
-                <div className="flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between">
-                    <div className="relative flex-2 mb-4 md:mb-0">
+                <div className='flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between'>
+                    <div className='relative flex-2 mb-4 md:mb-0'>
                         <input
                             type='text'
                             placeholder='Type to search..'
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
                             className='rounded-lg border-[1.5px] border-stroke bg-transparent py-2 pl-10 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary left-0'
                         />
                         <span className='absolute left-2 py-3 text-xl'>
@@ -172,43 +208,43 @@ const DataGaji = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {dataGaji.map((dataGaji) => {
+                            {visibleSalary.map((salary) => {
                                 return (
-                                    <tr key={dataGaji.id}>
+                                    <tr key={salary.id}>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.nik}</p>
+                                            <p className='text-black dark:text-white'>{salary.nik}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.namaPegawai}</p>
+                                            <p className='text-black dark:text-white'>{salary.nama_pegawai}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.jenisKelamin}</p>
+                                            <p className='text-black dark:text-white'>{salary.jenis_kelamin}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.titleJabatan}</p>
+                                            <p className='text-black dark:text-white'>{salary.titleJabatan}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.gajiPokok}</p>
+                                            <p className='text-black dark:text-white'>{salary.gajiPokok}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.tunjanganTransport}</p>
+                                            <p className='text-black dark:text-white'>{salary.tunjanganTransport}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.uangMakan}</p>
+                                            <p className='text-black dark:text-white'>{salary.uangMakan}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.jumlahPotongan}</p>
+                                            <p className='text-black dark:text-white'>{salary.jumlahPotongan}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
-                                            <p className='text-black dark:text-white'>{dataGaji.totalGaji}</p>
+                                            <p className='text-black dark:text-white'>{salary.totalGaji}</p>
                                         </td>
                                         <td className='border-b border-[#eee] py-5 px-4 text-center dark:border-strokedark'>
                                             <div className='flex items-center space-x-3.5'>
-                                                <button className='hover:text-black'>
-                                                    <FaRegEdit className="text-primary text-xl hover:text-black dark:hover:text-white" />
+                                                <button type='button' className='hover:text-black'>
+                                                    <FaRegEdit className='text-primary text-xl hover:text-black dark:hover:text-white' />
                                                 </button>
-                                                <button className='hover:text-black'>
-                                                    <BsTrash3 className="text-danger text-xl hover:text-black dark:hover:text-white" />
+                                                <button type='button' className='hover:text-black'>
+                                                    <BsTrash3 className='text-danger text-xl hover:text-black dark:hover:text-white' />
                                                 </button>
                                             </div>
                                         </td>
@@ -222,7 +258,7 @@ const DataGaji = () => {
                 <div className='flex justify-between items-center mt-4 flex-col md:flex-row md:justify-between'>
                     <div className='flex items-center space-x-2'>
                         <span className='text-gray-5 dark:text-gray-4 text-sm py-4'>
-                            Showing {startIndex}-{endIndex} of {DataGajiPegawai.length} Data Gaji Pegawai
+                            Showing {filteredSalary.length === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, filteredSalary.length)} of {filteredSalary.length} Data Gaji Pegawai
                         </span>
                     </div>
                     <div className='flex space-x-2 py-4'>
@@ -233,52 +269,17 @@ const DataGaji = () => {
                         >
                             Prev
                         </button>
-                        {[...Array(Math.min(totalPages, 5))].map((_, i) => {
-                            const page = i + 1;
-                            if (page === currentPage) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="py-2 px-4 rounded-lg border border-primary bg-primary text-white font-semibold hover:bg-primary dark:text-white dark:bg-primary dark:hover:bg-primary"
-                                    >
-                                        {page}
-                                    </div>
-                                );
-                            } else if (page === 2 && currentPage > 4) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className="py-2 px-4 border border-gray-2 dark:bg-transparent text-black font-medium bg-gray dark:border-strokedark dark:text-white"
-                                    >
-                                        ...
-                                    </p>
-                                );
-                            } else if (page === totalPages - 1 && currentPage < totalPages - 3) {
-                                return (
-                                    <p
-                                        key={i}
-                                        className="py-2 px-4 border border-gray-2 dark:bg-transparent text-black font-medium bg-gray dark:border-strokedark dark:text-white"
-                                    >
-                                        ...
-                                    </p>
-                                );
-                            } else if (
-                                page === 1 ||
-                                page === totalPages ||
-                                (page >= currentPage - 1 && page <= currentPage + 1)
-                            ) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="py-2 px-4 rounded-lg border border-gray-2 text-black dark:bg-transparent bg-gray font-medium dark:border-strokedark dark:text-white"
-                                    >
-                                        {page}
-                                    </div>
-                                );
-                            } else {
-                                return null;
-                            }
-                        })}
+                        {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => index + 1).map((page) => (
+                            <button
+                                key={`page-${page}`}
+                                onClick={() => setCurrentPage(page)}
+                                className={page === currentPage
+                                    ? 'py-2 px-4 rounded-lg border border-primary bg-primary text-white font-semibold hover:bg-primary dark:text-white dark:bg-primary dark:hover:bg-primary'
+                                    : 'py-2 px-4 rounded-lg border border-gray-2 text-black dark:bg-transparent bg-gray font-medium dark:border-strokedark dark:text-white'}
+                            >
+                                {page}
+                            </button>
+                        ))}
 
                         <button
                             disabled={currentPage === totalPages}
@@ -291,7 +292,7 @@ const DataGaji = () => {
                 </div>
             </div>
         </DefaultLayoutAdmin>
-    )
-}
+    );
+};
 
 export default DataGaji;
